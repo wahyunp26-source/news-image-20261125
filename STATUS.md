@@ -128,3 +128,94 @@ tariff, +26% UK cap, 490,334 Russian dead.
 - Two-line briefs (16, 23, 27, 28, 29) sit tight against the next brief
   line below; legible at full res.
 - NOT submitted, NOT pushed to GitHub. Local git commit only.
+
+---
+
+## v2 (26 Nov, polish pass)
+
+### What changed
+- Hero "WHY IT MATTERS" overlap FIXED: all three hero decks shortened to
+  max 2 lines, and the label y is now computed from the real deck height
+  (last deck baseline + deck descent + label ascent + 4px gap) instead of
+  a fixed y. Verified in a hero-deck crop (y 285–450): zero overlap in
+  all three heroes, clear gap between deck line 2 and the red label.
+- README badges replaced with the verified format (all three .svg URLs
+  + the bounty link return HTTP 200, checked by curl this session):
+  make.fun badge, rank badge, reward badge, all linking to
+  https://make.fun/bounty/news-image-20261125.
+- Briefs expanded 16 → 24 (stories 29 → 37). Layout now 2 columns × 12
+  rows at 15px pitch; every brief rewritten/checked as a single line
+  (max 222px of 240px at sans_r9); the wrap assert now enforces ≤1 line
+  so a 2-line brief can never silently collide with the next row.
+  Header count 29 → 37, pins note now "dots = briefs 14–37", region
+  counts updated (EUROPE 11, ASIA 8, MIDDLE EAST 7, AFRICA 4,
+  N. AMERICA 4, OCEANIA 2, S. AMERICA 1). New flags added: NG, SY, PR.
+- Shortened existing briefs 16, 23, 27, 28, 29 to one line each (same
+  facts, tighter wording).
+
+### Rendered image (v2)
+- Size: 1024×1024, RGB, PNG, **83,956 bytes** (limit 1,048,576)
+- SHA-256: `f5c84a1d7382d8fa5dbdfb193eaba385f5bd2d70b070a48a0f18c152d4b76053`
+- 37 stories: 3 heroes, 10 mids, 24 briefs
+
+### Tests (all passed)
+- Grader-style run: repo copied read-only to /tmp/grade2, run from a
+  different CWD as `python3 -P -s /tmp/grade2/main.py` — exit 0.
+- Determinism: two grader-style runs + one normal run, all three outputs
+  byte-identical (same SHA-256 above).
+- Size: 83,956 bytes ≤ 1 MiB; dimensions exactly 1024×1024.
+- Word-wrap audit: all asserts passed (hero decks ≤2 lines, briefs ≤1
+  line, mids/date-check/footer unchanged); no ValueError raised.
+- Visual check: full-res view + hero-deck crop (y 285–450) + bottom
+  crop + top crop. No overlaps, no clipped text, briefs legible; last
+  brief row (25/37) ends clear of the DATE CHECK footer.
+
+### New briefs 30–37 (each verified by web search this session)
+30. BORGU (NG) — "Militants kill 30+ in Niger state villages." Reuters,
+    25 Nov: suspected militants killed at least 30 in Niger state
+    villages, residents said Wednesday (attack Tue evening, reported Wed).
+31. PARIS (FR) — "Barrot tells Putin to drop 'colonial delusion'."
+    French FM Jean-Noël Barrot to TF1, Wed 25 Nov.
+32. TOKYO (JP) — "Japan targets No. 3 AI spot behind US, China."
+    Kyodo, Wed 25 Nov (draft economic-security outline).
+33. HASAKA (SY) — "IS attack kills 2 security men, 5 hurt." Reuters,
+    Wed 25 Nov: IS attack in Hasaka, Syrian state TV.
+34. SAN JUAN (PR) — "Barreto first mother to win Miss Universe."
+    Jennifer Barreto crowned Miss Universe 2026, first mother/married
+    woman to win; finale Tue 24 Nov local (early Wed 25 Nov UTC),
+    widely reported Wed 25 Nov (CNN, People).
+35. LONDON (GB) — "UK pressed to veto Nusseibeh for UN top job."
+    The New Arab, 25 Nov 16:07 UTC: UK faces pressure to veto Emirati
+    diplomat Lana Nusseibeh; 67 MPs wrote 16 Nov; straw poll 20 Nov.
+36. RIYADH (SA) — "Houthis claim PIF tower hit; 11 hurt." Attack Tue
+    24 Nov; Houthi claim of responsibility + condemnations Wed 25 Nov.
+37. LILLE (FR) — "Decathlon breach exposes 130,000 customers."
+    Breach 22 Nov at an external provider, confirmed to Ouest-France;
+    widely covered Wed 25 Nov (Anadolu wire 25 Nov, 137,549 emails).
+
+### Candidates DROPPED (could not verify as 25 Nov)
+- Mexico "El Chapo Isidro" capture: happened Fri–Sat 21–22 Nov; the
+  US-drone detail was revealed Mon 23 Nov / reported Tue 24 Nov.
+- Ecuador/US joint military activities: the real story is the OPPOSITE —
+  the US PAUSED joint ops with Ecuador, reported Tue 24 Nov (NYT/Reuters).
+- China official death sentence for spying: announced Mon 23 Nov,
+  widely reported Tue 24 Nov (CNN); not a 25 Nov story. (Also the
+  "100+ secrets" figure is wrong: 35 state secrets + 26 confidential.)
+- Lakers beat Jazz, Doncic 28: game was Mon 23 Nov, reported 24 Nov.
+- OpenAI apology to Australia: apology was Oct 6; Nov 25 coverage is
+  about California suing (filed 16 Nov) — too stale/muddy.
+
+### Known gaps / uncertainties (v2)
+- Story count 37 vs the live top-1's ~50 stories; gap narrowed from 21
+  to ~13. The top-1 also carries some 24 Nov items (Dell, Huawei,
+  Sinner) deliberately excluded here as date-faithful.
+- Two 25 Nov briefs (Riyadh, Decathlon) rest on Wed 25 Nov reporting
+  of events that happened 22–24 Nov (claim/coverage, not the event
+  itself); same precedent as the v1 CIA/ODNI brief (first reported
+  24 Nov, kept as brief only). The DATE CHECK footer still says
+  "happened or was first reported" — both qualify via first reporting
+  of the claim/coverage on 25 Nov.
+- Hero field lines ("MIDDLE EAST · ENERGY" etc.) sit tight against the
+  scene frame bottom (v1 behaviour, unchanged); legible at full res.
+- The space hero scene is still the sparsest of the three heroes.
+- NOT submitted, NOT pushed to GitHub. Local git commit only.

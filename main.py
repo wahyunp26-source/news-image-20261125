@@ -335,6 +335,9 @@ FLAGS = {
     "FR": ("v", [(0, 60, 160), WHITE, (220, 40, 40)]),
     "SE": ("se", None),
     "TR": ("tr", None),
+    "NG": ("v", [(0, 130, 70), WHITE, (0, 130, 70)]),
+    "SY": ("h", [(200, 30, 40), WHITE, (20, 20, 20)]),
+    "PR": ("h", [(200, 30, 40), WHITE, (0, 60, 160), WHITE, (200, 30, 40)]),
 }
 
 
@@ -795,8 +798,8 @@ def scene_java(cv, x, y, w, h):
 
 # ---------------------------------------------------------------- data
 REGIONS = [
-    ("EUROPE", 8, NAVY), ("ASIA", 7, TEAL), ("MIDDLE EAST", 5, RUST),
-    ("AFRICA", 3, GREEN), ("N. AMERICA", 3, BLUE), ("OCEANIA", 2, PURPLE),
+    ("EUROPE", 11, NAVY), ("ASIA", 8, TEAL), ("MIDDLE EAST", 7, RUST),
+    ("AFRICA", 4, GREEN), ("N. AMERICA", 4, BLUE), ("OCEANIA", 2, PURPLE),
     ("S. AMERICA", 1, ORANGE),
 ]
 
@@ -822,19 +825,19 @@ NUMBERS = [
 HEROES = [
     dict(n=1, place="STRAIT OF HORMUZ", field="MIDDLE EAST · ENERGY",
          headline="Two tankers hit mines and burn in Hormuz",
-         deck="Iran's Guards say the tankers took an unauthorised route and struck mines; no ship names or casualties were given.",
+         deck="Iran's Guards say the tankers took an unauthorised route and struck mines; no names or casualties given.",
          why="A fifth of seaborne oil passes here.",
          source="IRGC statement · Reuters", status="CLAIM", stat="2 TANKERS",
          scene=scene_hormuz),
     dict(n=2, place="JIUQUAN, CHINA", field="ASIA · SPACE",
          headline="Pakistan's first astronaut docks at Tiangong",
-         deck="Shenzhou-24 carried Muhammad Zeeshan Ali, 40, to China's station, the first foreigner aboard; he stays about a week.",
+         deck="Shenzhou-24 carried Muhammad Zeeshan Ali, 40, to China's station, the first foreigner aboard.",
          why="China's station takes its first foreign crew.",
          source="CMSA · Reuters · Nature", status="OFFICIAL", stat="00:18 GMT",
          scene=scene_space),
     dict(n=3, place="GIZA, EGYPT", field="AFRICA · DISASTER",
          headline="Fuel tanker fire kills 30 on Cairo ring road",
-         deck="A tanker overturned above a tunnel in Al-Warraq and exploded; dozens of cars burned and 25 people were hurt.",
+         deck="A tanker overturned above a tunnel in Al-Warraq and exploded; dozens of cars burned, 25 hurt.",
          why="The toll is preliminary and may rise.",
          source="Egypt Health Ministry · AP", status="CONFIRMED", stat="30+ KILLED",
          scene=scene_cairo),
@@ -887,20 +890,28 @@ MIDS = [
 BRIEFS = [
     (14, "VATICAN", "VA", "Pope calls COP31 failure 'troubling'.", 12, 42),
     (15, "CARTAGENA", "CO", "All hostages freed; one captor killed.", -75, 10),
-    (16, "MOSCOW", "RU", "BBC: leaked data show 490,334 Russian war dead.", 37, 56),
+    (16, "MOSCOW", "RU", "BBC: leak puts Russian war dead at 490,334.", 37, 56),
     (17, "WASHINGTON", "US", "Hack hits CIA and ODNI unclassified data.", -77, 39),
     (18, "KYIV", "UA", "Russian drones kill 7, hit power plants.", 30, 50),
     (19, "JAZAN", "SA", "Houthi projectile hits Saudi port; minor damage.", 42, 17),
     (20, "TEHRAN", "IR", "US tells citizens to leave Iran at once.", 51, 36),
     (21, "NEW YORK", "US", "Dow up 0.3% to 50,183; Nasdaq off 0.6%.", -74, 41),
     (22, "PARIS", "FR", "Eurostar cancels 8 trains in surprise strike.", 2, 49),
-    (23, "WARSAW", "PL", "Poland plans no-fly zone after drone incursion.", 21, 52),
+    (23, "WARSAW", "PL", "Poland plans no-fly zone after drone entry.", 21, 52),
     (24, "BENGHAZI", "LY", "Two Libyan officers die of Merkury wounds.", 20, 32),
     (25, "SYDNEY", "AU", "Australia inflation jumps to 4.9%.", 151, -34),
     (26, "TAIPEI", "TW", "Taiwan confident of keeping 15% US tariff.", 121, 25),
-    (27, "NEW DELHI", "IN", "India denies excess capacity after tariff salvo.", 77, 29),
-    (28, "OSLO", "NO", "Norway welcomes US decision to spare it tariffs.", 11, 60),
-    (29, "BEIJING", "CN", "China calls US overcapacity claim 'a false issue'.", 116, 40),
+    (27, "NEW DELHI", "IN", "India denies excess capacity in tariff row.", 77, 29),
+    (28, "OSLO", "NO", "Norway hails US tariff exemption.", 11, 60),
+    (29, "BEIJING", "CN", "China calls overcapacity claim 'a false issue'.", 116, 40),
+    (30, "BORGU", "NG", "Militants kill 30+ in Niger state villages.", 5, 10),
+    (31, "PARIS", "FR", "Barrot tells Putin to drop 'colonial delusion'.", 2, 49),
+    (32, "TOKYO", "JP", "Japan targets No. 3 AI spot behind US, China.", 140, 36),
+    (33, "HASAKA", "SY", "IS attack kills 2 security men, 5 hurt.", 41, 36),
+    (34, "SAN JUAN", "PR", "Barreto first mother to win Miss Universe.", -66, 18),
+    (35, "LONDON", "GB", "UK pressed to veto Nusseibeh for UN top job.", 0, 51),
+    (36, "RIYADH", "SA", "Houthis claim PIF tower hit; 11 hurt.", 47, 25),
+    (37, "LILLE", "FR", "Decathlon breach exposes 130,000 customers.", 3, 51),
 ]
 
 PINS = [
@@ -929,7 +940,7 @@ def draw_page(cv):
     # top bar
     cv.rect(0, 0, W, 20, NAVY)
     F["sans_b10"].draw(cv, 28, 14, "THE WORLD IN ONE DAY", GOLD_L)
-    right = "29 STORIES · 7 REGIONS · ALL FROM WEDNESDAY 25 NOVEMBER 2026"
+    right = "37 STORIES · 7 REGIONS · ALL FROM WEDNESDAY 25 NOVEMBER 2026"
     F["sans_b9"].draw(cv, 996 - F["sans_b9"].width(right), 14, right, WHITE)
     cv.rect(0, 20, W, 2, GOLD)
 
@@ -992,9 +1003,13 @@ def draw_page(cv):
         assert len(hl) <= 2, f"hero headline too long: {hro['headline']}"
         draw_lines(cv, F["serif_b20"], x, ky + 14, hl, INK, 22)
         dl = wrap(hro["deck"], F["serif_r12"], hw)
-        assert len(dl) <= 3, f"hero deck too long: {hro['deck']}"
+        assert len(dl) <= 2, f"hero deck too long: {hro['deck']}"
         draw_lines(cv, F["serif_r12"], x, ky + 60, dl, INK, 14)
-        wy = ky + 100
+        # label sits below the LAST deck line, computed from real metrics:
+        # deck last baseline + deck descent + label ascent + 4px clear gap
+        last_base = ky + 60 + (len(dl) - 1) * 14 + F["serif_r12"].ascent
+        wy = (last_base + F["serif_r12"].descent
+              + F["sans_b9"].ascent + 4)
         F["sans_b9"].draw(cv, x, wy, "WHY IT MATTERS", RED)
         wl = wrap(hro["why"], F["serif_i11"], hw)
         assert len(wl) <= 1, f"hero why too long: {hro['why']}"
@@ -1044,7 +1059,7 @@ def draw_page(cv):
     by = 762
     F["sans_b11"].draw(cv, 28, by + 11, "ALSO ON WEDNESDAY 25 NOVEMBER", RED)
     F["sans_b11"].draw(cv, 428, by + 11, "WHERE IT HAPPENED", NAVY)
-    cap = "numbered pins = stories 1-13 · dots = briefs 14-29"
+    cap = "numbered pins = stories 1-13 · dots = briefs 14-37"
     F["sans_r9"].draw(cv, 996 - F["sans_r9"].width(cap), by + 11, cap, GREY)
     cv.hline(28, by + 16, 968, LINE)
     draw_map(cv, 28, 778, 380, 172, PINS)
@@ -1053,17 +1068,17 @@ def draw_page(cv):
 
     col_w = 278
     for k, (n, place, flg, text, lon, lat) in enumerate(BRIEFS):
-        col = 0 if k < 8 else 1
-        j = k if k < 8 else k - 8
+        col = 0 if k < 12 else 1
+        j = k if k < 12 else k - 12
         bx = 428 + col * 288
-        byy = 778 + j * 21
+        byy = 778 + j * 15
         cv.rrect(bx, byy, 16, 11, 2, RED)
         F["sans_b9"].draw_center(cv, bx + 8, byy + 9, str(n), WHITE)
         flag(cv, bx + 20, byy + 1, 14, 10, flg)
         tx = bx + 38
         full = place + ": " + text
         lines = wrap(full, F["sans_r9"], col_w - 38)
-        assert len(lines) <= 2, f"brief too long: {full}"
+        assert len(lines) <= 1, f"brief too long for one line: {full}"
         # bold the place on the first line
         F["sans_b9"].draw(cv, tx, byy + 9, place + ":", RED)
         rest_w = F["sans_b9"].width(place + ": ")
