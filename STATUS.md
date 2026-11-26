@@ -219,3 +219,24 @@ tariff, +26% UK cap, 490,334 Russian dead.
   scene frame bottom (v1 behaviour, unchanged); legible at full res.
 - The space hero scene is still the sparsest of the three heroes.
 - NOT submitted, NOT pushed to GitHub. Local git commit only.
+
+## v4 — font fix (26 Nov)
+
+- Wahyu rejected v3's preview: "font nya kurang halus dan aku gasuka".
+  Root cause: the glyph atlases were 1-bit (no anti-aliasing) and the
+  runtime stamped ink as hard on/off pixels.
+- Fix: `gen_assets.py` now rasterises each glyph at 4x with PIL and
+  box-downsamples to the exact target ink box, storing 8-bit grayscale
+  coverage atlases; `Canvas.blit` in `main.py` alpha-blends with that
+  coverage (255 fast path, 0 skip). Typefaces unchanged: Liberation
+  Serif (Bold/Regular/Italic) for masthead/headlines/body serif,
+  Liberation Sans (Bold/Regular) for labels/chips. Layout, stories,
+  colours and the v3 dotted map are untouched — advances and ink boxes
+  still come from the target-size font metrics.
+- New entry.png: 1024x1024, 266,130 bytes, SHA-256
+  `1a7d2905329c5174265aaf080c7a67ad5cbd8991d620b7856f0f1ce4ebcb72fb`.
+  Two grader-style runs (read-only repo copy, `python3 -P -s`) produced
+  byte-identical output. Visually verified at full res + zoomed crops:
+  masthead, hero headlines, decks, briefs and footer all smooth.
+- `assets_blob.py` grew 41,612 -> 146,598 bytes (grayscale atlases).
+- NOT submitted, NOT pushed to GitHub. Local git commit only.

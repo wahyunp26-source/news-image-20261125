@@ -137,24 +137,34 @@ class Canvas:
             self.px[i + 2] = color[2]
 
     def blit(self, font, sx, sy, w, h, dx, dy, color):
+        # font.bits is an 8-bit coverage map: 0 = no ink, 255 = solid,
+        # anything between blends for smooth anti-aliased letter edges.
         bits = font.bits
         fw = font.w
         r, g, b = color
+        px = self.px
         for yy in range(h):
             ay = sy + yy
             by = dy + yy
             if by < 0 or by >= H:
                 continue
             base = by * W
+            arow = ay * fw + sx
             for xx in range(w):
-                ax = sx + xx
-                if bits[(ay * fw + ax) >> 3] >> (7 - (ax & 7)) & 1:
+                a = bits[arow + xx]
+                if a:
                     bx = dx + xx
                     if 0 <= bx < W:
                         i = (base + bx) * 3
-                        self.px[i] = r
-                        self.px[i + 1] = g
-                        self.px[i + 2] = b
+                        if a == 255:
+                            px[i] = r
+                            px[i + 1] = g
+                            px[i + 2] = b
+                        else:
+                            ia = 255 - a
+                            px[i] = (r * a + px[i] * ia) // 255
+                            px[i + 1] = (g * a + px[i + 1] * ia) // 255
+                            px[i + 2] = (b * a + px[i + 2] * ia) // 255
 
     def rect(self, x, y, w, h, color):
         x0 = max(0, x)
