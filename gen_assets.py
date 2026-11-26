@@ -24,22 +24,22 @@ from PIL import Image, ImageDraw, ImageFont
 FONT_DIR = "/usr/share/fonts/truetype/liberation/"
 
 # (atlas name, font file, pixel size)
+# v5: no text on the page is set below 11px, so no atlas smaller than
+# 11px is generated at all -- small type is now impossible to reach for.
 SPECS = [
     ("serif_b56", "LiberationSerif-Bold.ttf", 56),
     ("serif_b22", "LiberationSerif-Bold.ttf", 22),
     ("serif_b20", "LiberationSerif-Bold.ttf", 20),
-    ("serif_b15", "LiberationSerif-Bold.ttf", 15),
+    ("serif_b18", "LiberationSerif-Bold.ttf", 18),
+    ("serif_b17", "LiberationSerif-Bold.ttf", 17),
+    ("serif_b16", "LiberationSerif-Bold.ttf", 16),
+    ("serif_r13", "LiberationSerif-Regular.ttf", 13),
     ("serif_r12", "LiberationSerif-Regular.ttf", 12),
-    ("serif_r11", "LiberationSerif-Regular.ttf", 11),
-    ("serif_i13", "LiberationSerif-Italic.ttf", 13),
-    ("serif_i11", "LiberationSerif-Italic.ttf", 11),
+    ("serif_i14", "LiberationSerif-Italic.ttf", 14),
+    ("serif_i12", "LiberationSerif-Italic.ttf", 12),
+    ("sans_b12", "LiberationSans-Bold.ttf", 12),
     ("sans_b11", "LiberationSans-Bold.ttf", 11),
-    ("sans_b10", "LiberationSans-Bold.ttf", 10),
-    ("sans_b9", "LiberationSans-Bold.ttf", 9),
-    ("sans_b8", "LiberationSans-Bold.ttf", 8),
-    ("sans_r10", "LiberationSans-Regular.ttf", 10),
-    ("sans_r9", "LiberationSans-Regular.ttf", 9),
-    ("sans_r8", "LiberationSans-Regular.ttf", 8),
+    ("sans_r11", "LiberationSans-Regular.ttf", 11),
 ]
 
 # Every character the page ever draws: printable ASCII plus the few extras

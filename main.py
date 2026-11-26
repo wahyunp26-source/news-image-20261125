@@ -295,10 +295,10 @@ def write_png(cv, path):
 
 # ---------------------------------------------------------------- helpers
 def chip(cv, x, y, text, bg, fg=WHITE, font=None):
-    f = font or F["sans_b9"]
-    w = f.width(text) + 10
-    cv.rrect(x, y, w, 12, 2, bg)
-    f.draw(cv, x + 5, y + 9, text, fg)
+    f = font or F["sans_b11"]
+    w = f.width(text) + 12
+    cv.rrect(x, y, w, 16, 3, bg)
+    f.draw(cv, x + 6, y + 12, text, fg)
     return w
 
 
@@ -309,10 +309,10 @@ def badge(cv, x, y, text):
     return chip(cv, x, y, text, bg)
 
 
-def num_circle(cv, cx, cy, n, r=8):
+def num_circle(cv, cx, cy, n, r=9):
     cv.disc(cx, cy, r, WHITE)
     cv.ring(cx, cy, r, RED, 1)
-    F["sans_b9"].draw_center(cv, cx, cy + 3, str(n), RED)
+    F["sans_b11"].draw_center(cv, cx, cy + 4, str(n), RED)
 
 
 # Tiny flags (14x10) drawn from simple band/cross/disc patterns.
@@ -517,7 +517,7 @@ def draw_map(cv, x, y, w, h, pins):
         cv.disc(px, py, 2, RED)
         if dx or dy:
             cv.line(px, py, qx, qy, RED, 1)
-        num_circle(cv, qx, qy, n, 7)
+        num_circle(cv, qx, qy, n, 8)
 
 
 def draw_brief_dots(cv, x, y, w, h, briefs):
@@ -550,43 +550,89 @@ def _gulls(cv, x, y, col):
     cv.line(x + 15, y - 1, x + 18, y + 2, col, 1)
 
 
+def _cloud(cv, x, y, col, s=1):
+    """Flat puffy cloud: three overlapping discs on a flat base."""
+    cv.disc(x, y, 5 * s, col)
+    cv.disc(x + 7 * s, y - 2 * s, 6 * s, col)
+    cv.disc(x + 14 * s, y, 5 * s, col)
+    cv.rect(x - 4 * s, y, 22 * s, 3 * s, col)
+
+
+def _waves(cv, x, y, n, col, gap=26, wlen=15):
+    for i in range(n):
+        cv.rect(x + i * gap, y + (i % 2) * 3, wlen, 2, col)
+
+
+def _person(cv, x, y, col, s=1):
+    """Tiny standing figure: head disc + body + legs, ~11*s tall."""
+    cv.disc(x, y, 2 * s, col)
+    cv.rect(x - 1, y + 2 * s, 2 * s + 1, 5 * s, col)
+    cv.line(x, y + 7 * s, x - 2 * s, y + 10 * s, col, 1)
+    cv.line(x, y + 7 * s, x + 2 * s, y + 10 * s, col, 1)
+
+
+def _windows(cv, x, y, cols, rows, col, cw=4, ch=5, gx=8, gy=9):
+    for r in range(rows):
+        for c in range(cols):
+            cv.rect(x + c * gx, y + r * gy, cw, ch, col)
+
+
 def scene_hormuz(cv, x, y, w, h):
-    cv.vgrad(x, y, w, h, (250, 170, 90), (214, 96, 44))
-    cv.disc(x + w - 52, y + 26, 22, (255, 214, 130))
-    cv.disc(x + w - 52, y + 26, 13, (255, 236, 170))
-    for i in range(5):
-        cv.rect(x + 20 + i * 46, y + 58 + i * 2, 34, 2, (255, 220, 150))
+    # sunset sky + sun with rays + clouds
+    cv.vgrad(x, y, w, h, (250, 170, 90), (216, 102, 48))
+    cv.disc(x + w - 52, y + 20, 15, (255, 214, 130))
+    cv.disc(x + w - 52, y + 20, 9, (255, 238, 175))
+    for dx, dy in ((-22, 0), (22, 0), (0, -20), (-16, -14), (16, -14)):
+        cv.line(x + w - 52 + dx // 2, y + 20 + dy // 2,
+                x + w - 52 + dx, y + 20 + dy, (255, 220, 150), 2)
+    _cloud(cv, x + 18, y + 10, (252, 196, 130))
+    _cloud(cv, x + 128, y + 6, (250, 186, 118))
+    _gulls(cv, x + 84, y + 14, (120, 70, 40))
     # sea
-    cv.vgrad(x, y + 60, w, h - 60, (24, 78, 96), (12, 44, 62))
-    for i in range(4):
-        cv.rect(x + 30 + i * 60, y + 68 + i * 3, 44, 2, (120, 180, 200))
-    # tanker 1 (left, burning)
-    hx, hy = x + 34, y + 76
-    cv.rect(hx, hy, 96, 16, (52, 48, 58))
-    cv.rect(hx, hy - 2, 96, 3, (150, 60, 50))
-    cv.rect(hx + 70, hy - 16, 20, 14, (200, 200, 200))
-    cv.rect(hx + 74, hy - 12, 4, 4, (40, 40, 40))
-    cv.rect(hx + 82, hy - 12, 4, 4, (40, 40, 40))
+    cv.vgrad(x, y + 42, w, h - 42, (24, 78, 96), (12, 44, 62))
+    _waves(cv, x + 14, y + 48, 4, (120, 180, 200), gap=58)
+    _waves(cv, x + 40, y + 66, 3, (96, 156, 180), gap=64)
+    # distant third ship, a dark silhouette on the horizon
+    cv.rect(x + 196, y + 38, 36, 5, (90, 60, 50))
+    cv.rect(x + 210, y + 33, 8, 5, (90, 60, 50))
+    cv.line(x + 214, y + 33, x + 214, y + 28, (90, 60, 50), 1)
+    # tanker 1 (left, burning): hull, deck stripe, 3 tank domes, bridge
+    hx, hy = x + 22, y + 52
+    cv.rect(hx, hy, 102, 13, (52, 48, 58))
+    cv.rect(hx, hy - 2, 102, 3, (150, 60, 50))
     for i in range(3):
-        cv.rect(hx + 8 + i * 20, hy - 12, 16, 10, (30, 120, 130))
-    _flame(cv, hx + 26, hy - 12, 26, 30, [(240, 90, 20), (250, 160, 40), (255, 220, 110)])
-    _flame(cv, hx + 78, hy - 16, 18, 22, [(240, 90, 20), (250, 160, 40)])
-    _smoke(cv, hx + 26, hy - 42, 3, (60, 56, 52))
+        cv.rect(hx + 8 + i * 20, hy - 11, 16, 9, (30, 120, 130))
+        cv.rect(hx + 8 + i * 20, hy - 11, 16, 2, (24, 96, 106))
+    cv.rect(hx + 74, hy - 15, 22, 13, (205, 205, 205))
+    cv.rect(hx + 78, hy - 12, 4, 4, (40, 40, 40))
+    cv.rect(hx + 86, hy - 12, 4, 4, (40, 40, 40))
+    cv.rect(hx + 80, hy - 5, 5, 3, (120, 40, 30))
+    cv.line(hx + 96, hy - 15, hx + 96, hy - 21, (60, 56, 52), 1)
+    _flame(cv, hx + 24, hy - 11, 24, 26, [(240, 90, 20), (250, 160, 40), (255, 220, 110)])
+    _flame(cv, hx + 82, hy - 15, 16, 18, [(240, 90, 20), (250, 160, 40)])
+    _smoke(cv, hx + 24, hy - 26, 3, (60, 56, 52))
+    # wake behind tanker 1
+    cv.line(hx - 2, hy + 10, hx - 14, hy + 13, (150, 200, 215), 1)
+    cv.line(hx - 2, hy + 12, hx - 10, hy + 15, (150, 200, 215), 1)
     # tanker 2 (right, burning)
-    hx, hy = x + 150, y + 84
-    cv.rect(hx, hy, 88, 14, (62, 56, 66))
-    cv.rect(hx, hy - 2, 88, 3, (150, 60, 50))
-    cv.rect(hx + 8, hy - 14, 18, 12, (210, 210, 210))
+    hx, hy = x + 146, y + 58
+    cv.rect(hx, hy, 86, 11, (62, 56, 66))
+    cv.rect(hx, hy - 2, 86, 3, (150, 60, 50))
+    cv.rect(hx + 6, hy - 12, 17, 10, (212, 212, 212))
+    cv.rect(hx + 9, hy - 10, 4, 3, (40, 40, 40))
     for i in range(2):
-        cv.rect(hx + 34 + i * 18, hy - 10, 14, 8, (180, 60, 40))
-    _flame(cv, hx + 44, hy - 10, 24, 26, [(240, 90, 20), (250, 160, 40), (255, 220, 110)])
-    _smoke(cv, hx + 44, hy - 36, 3, (60, 56, 52))
-    # mines on the water
-    for mx, my in ((x + 128, y + 94), (x + 216, y + 98), (x + 60, y + 96)):
-        cv.disc(mx, my, 5, (20, 20, 24))
-        for a, b in ((-6, 0), (6, 0), (0, -6), (-4, -4), (4, -4)):
+        cv.rect(hx + 32 + i * 18, hy - 9, 14, 7, (180, 60, 40))
+    _flame(cv, hx + 48, hy - 9, 22, 22, [(240, 90, 20), (250, 160, 40), (255, 220, 110)])
+    _smoke(cv, hx + 48, hy - 32, 3, (60, 56, 52))
+    # oil slick trailing from tanker 1
+    for i in range(4):
+        cv.disc(x + 108 + i * 9, y + 68 - (i % 2) * 2, 3, (16, 34, 44))
+    # mines on the water, with spikes and sinker chains
+    for mx, my in ((x + 130, y + 62), (x + 224, y + 66), (x + 56, y + 70)):
+        cv.disc(mx, my, 4, (20, 20, 24))
+        for a, b in ((-5, 0), (5, 0), (0, -5), (-3, -3), (3, -3)):
             cv.line(mx, my, mx + a, my + b, (20, 20, 24), 1)
-    _gulls(cv, x + 16, y + 18, (120, 70, 40))
+        cv.line(mx, my + 4, mx, my + 8, (20, 20, 24), 1)
 
 
 def scene_space(cv, x, y, w, h):
@@ -594,12 +640,15 @@ def scene_space(cv, x, y, w, h):
     for sx, sy, r in ((24, 14, 1), (60, 30, 1), (120, 10, 1), (180, 22, 2),
                       (230, 12, 1), (40, 52, 1), (96, 44, 1), (150, 48, 1),
                       (210, 40, 1), (16, 70, 1), (240, 66, 1), (84, 66, 1),
-                      (130, 62, 1), (200, 58, 1), (10, 40, 1), (250, 46, 1)):
+                      (130, 62, 1), (200, 58, 1), (10, 40, 1), (250, 46, 1),
+                      (70, 8, 1), (160, 32, 1), (36, 24, 1), (222, 30, 1)):
         cv.disc(x + sx, y + sy, r, WHITE)
+    cv.disc(x + 150, y + 16, 1, GOLD_L)
+    cv.disc(x + 52, y + 40, 1, GOLD_L)
     # Earth arc at the bottom: a very large circle, only its top sliver shows.
     import math as _math
     _cx = x + w // 2
-    _cy = y + h + 778
+    _cy = y + h + 752
     _r = 800
     _pts = []
     for _xx in range(x, x + w + 1, 8):
@@ -615,240 +664,456 @@ def scene_space(cv, x, y, w, h):
         _pts2.append((_xx, _yy))
     _pts2 += [(x + w, y + h), (x, y + h)]
     cv.poly(_pts2, (28, 110, 170))
+    # cloud swirls + land on the visible arc
     cv.poly([(x + 30, y + h - 2), (x + 90, y + h - 10), (x + 150, y + h - 5),
              (x + 210, y + h - 12), (x + 250, y + h - 3), (x + 250, y + h),
              (x + 30, y + h)], (34, 140, 90))
     cv.poly([(x + 60, y + h - 1), (x + 110, y + h - 7), (x + 170, y + h - 2),
              (x + 230, y + h - 6), (x + 250, y + h - 1), (x + 250, y + h),
              (x + 60, y + h)], (60, 170, 110))
-    # Tiangong station: truss + modules + solar panels
-    sx, sy = x + 52, y + 34
-    cv.rect(sx, sy + 12, 150, 5, (200, 200, 205))
-    cv.rect(sx + 6, sy, 44, 12, (40, 90, 160))
-    cv.rect(sx + 6, sy + 14, 44, 3, (30, 70, 130))
-    cv.rect(sx + 58, sy - 2, 40, 12, (220, 220, 225))
-    cv.rect(sx + 62, sy + 1, 8, 6, (30, 90, 160))
-    cv.rect(sx + 74, sy + 1, 8, 6, (30, 90, 160))
-    cv.rect(sx + 106, sy + 2, 34, 9, (200, 200, 205))
-    cv.disc(sx + 140, sy + 6, 5, (230, 230, 235))
-    cv.rect(sx + 2, sy + 22, 8, 10, (180, 180, 185))
-    # Shenzhou capsule docking, flame trail
-    cx, cy = x + 196, y + 66
-    cv.poly([(cx - 6, cy - 26), (cx + 6, cy - 26), (cx + 10, cy - 6),
-             (cx - 10, cy - 6)], (250, 200, 90))
-    cv.rect(cx - 12, cy - 6, 24, 14, (235, 235, 238))
-    cv.rect(cx - 12, cy + 8, 24, 4, (30, 90, 160))
-    cv.disc(cx, cy + 1, 3, (30, 90, 160))
-    cv.line(cx - 4, cy - 26, cx, cy - 34, (255, 220, 120), 2)
-    cv.line(cx + 4, cy - 26, cx, cy - 34, (255, 220, 120), 2)
-    # Pakistani + Chinese flags on the station module
-    cv.rect(sx + 62, sy + 12, 10, 6, (0, 110, 60))
-    cv.rect(sx + 74, sy + 12, 10, 6, (200, 30, 30))
-    cv.disc(sx + 79, sy + 15, 1, GOLD_L)
-    F["sans_b8"].draw(cv, x + 8, y + 14, "SHENZHOU-24", GOLD_L)
-    F["sans_b8"].draw(cv, x + w - 58, y + 14, "TIANGONG", GOLD_L)
+    for cxp, cyp in ((52, h - 16), (128, h - 13), (196, h - 17)):
+        cv.disc(x + cxp, y + cyp, 4, (235, 244, 250))
+        cv.disc(x + cxp + 6, y + cyp + 1, 3, (235, 244, 250))
+    # Tiangong station: truss + gridded solar arrays + modules + antenna
+    sx, sy = x + 44, y + 26
+    cv.rect(sx, sy + 10, 158, 4, (200, 200, 205))
+    for ax in (sx, sx + 112):
+        cv.rect(ax, sy + 2, 42, 11, (40, 90, 160))
+        for gx in range(1, 4):
+            cv.vline(ax + gx * 10, sy + 2, 11, (28, 66, 120))
+        cv.hline(ax, sy + 7, 42, (28, 66, 120))
+    cv.rect(sx + 50, sy, 38, 12, (222, 222, 226))
+    cv.rect(sx + 54, sy + 3, 7, 6, (30, 90, 160))
+    cv.rect(sx + 66, sy + 3, 7, 6, (30, 90, 160))
+    cv.rect(sx + 94, sy + 2, 14, 8, (200, 200, 205))
+    cv.disc(sx + 112, sy + 6, 4, (232, 232, 236))
+    cv.line(sx + 66, sy, sx + 66, sy - 7, (200, 200, 205), 1)
+    cv.disc(sx + 66, sy - 9, 2, (240, 200, 90))
+    # Pakistani + Chinese flags on the main module
+    cv.rect(sx + 54, sy + 13, 10, 6, (0, 110, 60))
+    cv.rect(sx + 67, sy + 13, 10, 6, (200, 30, 30))
+    cv.disc(sx + 72, sy + 16, 1, GOLD_L)
+    # Shenzhou capsule closing in horizontally: nose cone, window, thruster
+    cx, cy = x + 218, y + 46
+    cv.rrect(cx - 24, cy - 7, 36, 14, 6, (235, 235, 238))
+    cv.poly([(cx - 24, cy - 6), (cx - 38, cy), (cx - 24, cy + 6)],
+            (250, 200, 90))
+    cv.disc(cx - 10, cy, 3, (30, 90, 160))
+    cv.rect(cx + 4, cy - 7, 5, 14, (30, 90, 160))
+    cv.poly([(cx + 12, cy - 4), (cx + 22, cy), (cx + 12, cy + 4)],
+            (255, 190, 80))
+    cv.poly([(cx + 12, cy - 2), (cx + 17, cy), (cx + 12, cy + 2)],
+            (255, 230, 150))
+    cv.ring(cx - 48, cy, 3, (120, 220, 160), 1)
+    cv.line(cx - 48, cy - 6, cx - 48, cy + 6, (120, 220, 160), 1)
+    cv.line(cx - 54, cy, cx - 42, cy, (120, 220, 160), 1)
+    F["sans_b11"].draw(cv, x + 8, y + 14, "SHENZHOU-24", GOLD_L)
+    F["sans_b11"].draw(cv, x + w - 8 - F["sans_b11"].width("TIANGONG"),
+                       y + 14, "TIANGONG", GOLD_L)
 
 
 def scene_cairo(cv, x, y, w, h):
     cv.vgrad(x, y, w, h, (18, 26, 58), (40, 52, 96))
-    for sx, sy in ((20, 12), (70, 22), (150, 10), (210, 20), (240, 8)):
+    for sx, sy in ((20, 12), (70, 22), (150, 10), (210, 20), (240, 8), (110, 16)):
         cv.disc(x + sx, y + sy, 1, (220, 220, 200))
-    # skyline
-    base = y + 62
-    for bx, bw, bh in ((6, 26, 26), (36, 18, 36), (58, 30, 22), (92, 16, 30),
-                       (150, 24, 34), (178, 20, 24), (202, 30, 30), (236, 16, 22)):
+    # crescent moon
+    cv.disc(x + 232, y + 14, 7, (240, 226, 170))
+    cv.disc(x + 236, y + 12, 6, (24, 32, 62))
+    # skyline with lit windows, a minaret and a dome
+    base = y + 44
+    for bx, bw, bh in ((4, 24, 22), (32, 16, 30), (52, 26, 18), (82, 14, 26),
+                       (170, 22, 28), (196, 18, 20), (218, 26, 24)):
         cv.rect(x + bx, base - bh, bw, bh, (14, 18, 40))
-        for wy in range(2):
-            cv.rect(x + bx + 5 + wy * 8, base - bh + 6, 3, 4, (240, 200, 110))
-    # highway
-    cv.rect(x, base, w, h - 62, (52, 50, 48))
+        _windows(cv, x + bx + 4, base - bh + 5, 2, 2, (240, 200, 110),
+                 cw=3, ch=4, gx=8, gy=8)
+    cv.rect(x + 128, base - 38, 7, 38, (14, 18, 40))
+    cv.disc(x + 131, base - 38, 5, (14, 18, 40))
+    cv.disc(x + 131, base - 45, 2, (240, 200, 110))
+    cv.rect(x + 142, base - 16, 24, 16, (14, 18, 40))
+    cv.disc(x + 154, base - 16, 9, (14, 18, 40))
+    # ring road
+    cv.rect(x, base, w, h - 44, (52, 50, 48))
     cv.rect(x, base, w, 3, (200, 200, 200))
     for i in range(6):
-        cv.rect(x + 10 + i * 44, base + 34, 22, 3, (240, 220, 140))
+        cv.rect(x + 10 + i * 44, base + 22, 22, 3, (240, 220, 140))
+    # streetlight
+    cv.line(x + 66, base + 26, x + 66, base + 4, (30, 30, 30), 2)
+    cv.line(x + 66, base + 4, x + 74, base + 4, (30, 30, 30), 1)
+    cv.disc(x + 75, base + 5, 2, (255, 230, 150))
     # overturned tanker + cab
-    tx, ty = x + 96, base + 16
+    tx, ty = x + 96, base + 10
     cv.rect(tx, ty - 4, 62, 12, (180, 60, 40))
+    cv.rect(tx + 4, ty - 1, 54, 2, (140, 44, 30))
     cv.disc(tx + 62, ty + 2, 6, (180, 60, 40))
     cv.rect(tx - 22, ty - 2, 20, 10, (200, 200, 200))
     cv.rect(tx - 20, ty, 6, 4, (40, 60, 90))
-    # cars caught in the fire
-    for cxp in (x + 30, x + 196):
-        cv.rect(cxp, base + 8, 26, 8, (30, 90, 140))
-        cv.rect(cxp + 4, base + 2, 16, 7, (60, 120, 170))
-        cv.disc(cxp + 6, base + 17, 3, (10, 10, 10))
-        cv.disc(cxp + 20, base + 17, 3, (10, 10, 10))
-    # the big fire
-    _flame(cv, tx + 30, ty - 4, 90, 52, [(230, 70, 16), (250, 150, 40), (255, 220, 110)])
-    _flame(cv, tx + 66, ty - 4, 46, 34, [(230, 70, 16), (250, 150, 40)])
-    _smoke(cv, tx + 30, ty - 56, 4, (30, 28, 26))
-    _smoke(cv, tx + 66, ty - 40, 3, (40, 36, 32))
-    # ambulance + crowd
-    ax, ay = x + 14, base + 30
-    cv.rect(ax, ay, 26, 12, WHITE)
-    cv.rect(ax + 18, ay + 3, 3, 6, RED)
-    cv.rect(ax + 16, ay + 5, 7, 2, RED)
-    for i in range(5):
-        cv.disc(x + 150 + i * 10, base + 34, 2, (220, 200, 180))
+    cv.disc(tx + 10, ty + 10, 3, (10, 10, 10))
+    cv.disc(tx + 48, ty + 10, 3, (10, 10, 10))
+    # cars caught near the fire
+    for cxp, cyp in ((x + 28, base + 4), (x + 198, base + 6)):
+        cv.rect(cxp, cyp, 26, 8, (30, 90, 140))
+        cv.rect(cxp + 4, cyp - 6, 16, 7, (60, 120, 170))
+        cv.rect(cxp + 7, cyp - 5, 5, 4, (190, 220, 240))
+        cv.disc(cxp + 6, cyp + 9, 3, (10, 10, 10))
+        cv.disc(cxp + 20, cyp + 9, 3, (10, 10, 10))
+    # the big fire: three teardrop flames along the tank + a glow line
+    cv.rect(tx - 4, ty - 6, 70, 4, (250, 150, 40))
+    _flame(cv, tx + 28, ty - 4, 34, 44, [(230, 70, 16), (250, 150, 40), (255, 220, 110)])
+    _flame(cv, tx + 58, ty - 4, 22, 30, [(230, 70, 16), (250, 150, 40)])
+    _flame(cv, tx + 2, ty - 4, 15, 20, [(230, 70, 16), (250, 150, 40)])
+    _smoke(cv, tx + 28, ty - 40, 2, (30, 28, 26), r0=4)
+    _smoke(cv, tx + 58, ty - 30, 2, (40, 36, 32), r0=3)
+    # ambulance with cross + fire crew figures
+    ax, ay = x + 12, base + 18
+    cv.rect(ax, ay, 27, 12, WHITE)
+    cv.rect(ax + 19, ay + 3, 3, 6, RED)
+    cv.rect(ax + 17, ay + 5, 7, 2, RED)
+    cv.disc(ax + 6, ay + 13, 3, (10, 10, 10))
+    cv.disc(ax + 21, ay + 13, 3, (10, 10, 10))
+    for i in range(4):
+        _person(cv, x + 168 + i * 11, base + 20, (220, 200, 180))
+    cv.line(x + 160, base + 30, x + 128, base + 16, (200, 60, 40), 2)
 
 
-# ---- mid scenes (185x66) ----
+# ---- mid scenes (185x52) ----
 def scene_hodeidah(cv, x, y, w, h):
-    cv.vgrad(x, y, w, h, (250, 200, 140), (220, 150, 80))
-    cv.vgrad(x, y + 40, w, h - 40, (30, 90, 120), (18, 60, 90))
-    for cxp in (10, 60, 120):
-        cv.rect(x + cxp, y + 8, 34, 30, (120, 90, 60))
-        cv.rect(x + cxp + 4, y + 12, 26, 4, (90, 70, 45))
-        cv.rect(x + cxp + 4, y + 20, 26, 4, (90, 70, 45))
-    cv.line(x + 150, y + 6, x + 170, y + 38, (40, 40, 40), 2)
-    cv.line(x + 150, y + 6, x + 140, y + 38, (40, 40, 40), 2)
-    cv.rect(x + 138, y + 4, 26, 4, (40, 40, 40))
-    _flame(cv, x + 30, y + 40, 22, 18, [(240, 90, 20), (250, 160, 40)])
-    _smoke(cv, x + 30, y + 22, 3, (70, 66, 60))
-    cv.rect(x + 150, y + 46, 30, 8, (200, 200, 200))
-    cv.rect(x + 156, y + 40, 12, 6, (60, 60, 60))
+    cv.vgrad(x, y, w, h, (250, 200, 140), (224, 158, 88))
+    cv.disc(x + 164, y + 10, 7, (255, 226, 150))
+    cv.vgrad(x, y + 34, w, h - 34, (30, 90, 120), (18, 60, 90))
+    _waves(cv, x + 8, y + 44, 4, (140, 200, 220), gap=46, wlen=12)
+    # container stacks with ribbed sides, three colours
+    for sx, cols in ((6, ((180, 90, 50), (40, 110, 150))),
+                     (52, ((60, 140, 90), (180, 90, 50), (200, 160, 60))),
+                     (98, ((40, 110, 150), (150, 70, 90)))):
+        for i, c in enumerate(cols):
+            by = y + 30 - (len(cols) - i) * 9
+            cv.rect(x + sx, by, 40, 9, c)
+            for rx in range(4):
+                cv.vline(x + sx + 5 + rx * 9, by + 1, 7, (70, 58, 44))
+            cv.rect(x + sx, by, 40, 1, (255, 255, 255))
+    # one dock crane by the ship: mast, jib, back-stay, cable and hook block
+    cv.line(x + 170, y + 40, x + 170, y + 22, (40, 40, 40), 3)
+    cv.line(x + 170, y + 22, x + 138, y + 27, (40, 40, 40), 2)
+    cv.line(x + 170, y + 22, x + 179, y + 34, (40, 40, 40), 1)
+    cv.line(x + 146, y + 25, x + 146, y + 33, (40, 40, 40), 1)
+    cv.rect(x + 143, y + 33, 7, 5, (200, 160, 60))
+    # ship hull at the quay + smoke from a struck stack
+    cv.poly([(x + 116, y + 40), (x + 168, y + 40), (x + 162, y + 47),
+             (x + 122, y + 47)], (52, 48, 58))
+    cv.rect(x + 150, y + 34, 12, 6, (200, 200, 200))
+    _flame(cv, x + 26, y + 21, 18, 13, [(240, 90, 20), (250, 160, 40)])
+    _smoke(cv, x + 26, y + 20, 3, (70, 66, 60), r0=3)
+    _gulls(cv, x + 60, y + 6, (120, 80, 40))
 
 
 def scene_markets(cv, x, y, w, h):
     cv.vgrad(x, y, w, h, (14, 20, 44), (30, 40, 70))
-    for gy in range(0, 5):
-        cv.hline(x + 6, y + 8 + gy * 12, w - 12, (60, 70, 100))
-    pts = [(x + 8, y + 12), (x + 40, y + 20), (x + 72, y + 16), (x + 104, y + 30),
-           (x + 136, y + 40), (x + 168, y + 52)]
+    for gy in range(5):
+        cv.hline(x + 6, y + 6 + gy * 10, w - 12, (60, 70, 100))
+    for gx in range(6):
+        cv.vline(x + 6 + gx * 30, y + 6, 40, (44, 54, 84))
+    pts = [(x + 8, y + 20), (x + 38, y + 26), (x + 68, y + 20), (x + 98, y + 30),
+           (x + 128, y + 38), (x + 158, y + 45)]
     for i in range(len(pts) - 1):
         cv.line(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], (240, 70, 60), 2)
     for pxp, pyp in pts[1:]:
         cv.disc(pxp, pyp, 2, (255, 120, 100))
-    cv.rect(x + 12, y + 40, 26, 18, (20, 120, 90))
-    cv.rect(x + 18, y + 46, 4, 4, GOLD_L)
-    cv.rect(x + 26, y + 46, 4, 4, GOLD_L)
-    cv.rect(x + 18, y + 52, 12, 2, GOLD_L)
-    F["sans_b8"].draw(cv, x + 120, y + 12, "KOSPI", (255, 120, 100))
+    # a faint green counter-line underneath
+    gpts = [(x + 8, y + 40), (x + 48, y + 37), (x + 88, y + 39), (x + 128, y + 35)]
+    for i in range(len(gpts) - 1):
+        cv.line(gpts[i][0], gpts[i][1], gpts[i + 1][0], gpts[i + 1][1],
+                (60, 180, 110), 1)
+    # candlesticks, red then green
+    for cxp, top, bot, c in ((143, 8, 22, (240, 70, 60)),
+                             (156, 14, 26, (240, 70, 60)),
+                             (169, 18, 30, (60, 180, 110))):
+        cv.line(x + cxp + 4, y + top - 4, x + cxp + 4, y + bot + 4, c, 1)
+        cv.rect(x + cxp, y + top, 9, bot - top, c)
+    # falling arrow + chip icon
+    cv.line(x + 96, y + 30, x + 112, y + 42, (240, 70, 60), 2)
+    cv.poly([(x + 106, y + 44), (x + 118, y + 44), (x + 112, y + 36)],
+            (240, 70, 60))
+    cv.rect(x + 10, y + 34, 20, 15, (20, 120, 90))
+    cv.rect(x + 15, y + 38, 10, 7, (16, 84, 64))
+    for pxp in (12, 26):
+        cv.disc(x + pxp, y + 36, 1, GOLD_L)
+        cv.disc(x + pxp, y + 47, 1, GOLD_L)
+    F["sans_b11"].draw(cv, x + 30, y + 13, "KOSPI", (255, 120, 100))
 
 
 def scene_tariffs(cv, x, y, w, h):
-    cv.vgrad(x, y, w, h, (150, 200, 235), (90, 150, 200))
-    cv.vgrad(x, y + 42, w, h - 42, (24, 90, 130), (16, 60, 100))
-    for i in range(3):
-        cv.rect(x + 20 + i * 52, y + 48 + i, 36, 2, (200, 230, 245))
-    # ship
-    sx, sy = x + 22, y + 30
-    cv.poly([(sx, sy), (sx + 140, sy), (sx + 128, sy + 14), (sx + 12, sy + 14)], (30, 30, 36))
-    cv.rect(sx + 118, sy - 12, 16, 12, (220, 220, 220))
-    for i, c in enumerate(((200, 60, 40), (40, 120, 180), (240, 180, 40),
-                           (40, 150, 90), (180, 60, 120), (220, 120, 40))):
-        cv.rect(sx + 14 + i * 18, sy - 12, 16, 12, c)
-    cv.disc(x + w - 26, y + 14, 13, RED)
-    F["sans_b8"].draw_center(cv, x + w - 26, y + 17, "20%", WHITE)
+    cv.vgrad(x, y, w, h, (150, 200, 235), (96, 156, 204))
+    cv.disc(x + 10, y + 8, 6, (255, 240, 170))
+    cv.vgrad(x, y + 32, w, h - 32, (24, 90, 130), (16, 60, 100))
+    _waves(cv, x + 12, y + 42, 4, (200, 230, 245), gap=48, wlen=13)
+    _gulls(cv, x + 52, y + 8, (70, 100, 130))
+    # container ship: hull, bridge with windows and flag, two container rows
+    sx, sy = x + 14, y + 26
+    cv.poly([(sx, sy), (sx + 138, sy), (sx + 126, sy + 13), (sx + 12, sy + 13)],
+            (30, 30, 36))
+    cv.rect(sx + 116, sy - 13, 17, 13, (222, 222, 222))
+    cv.rect(sx + 119, sy - 10, 4, 4, (40, 60, 90))
+    cv.rect(sx + 126, sy - 10, 4, 4, (40, 60, 90))
+    cv.line(sx + 124, sy - 13, sx + 124, sy - 19, (30, 30, 36), 1)
+    cv.rect(sx + 124, sy - 19, 7, 4, (200, 40, 40))
+    cols = ((200, 60, 40), (40, 120, 180), (240, 180, 40),
+            (40, 150, 90), (180, 60, 120), (220, 120, 40))
+    for i, c in enumerate(cols[:3]):
+        cv.rect(sx + 10 + i * 34, sy - 11, 32, 11, c)
+        cv.vline(sx + 20 + i * 34, sy - 11, 11, (60, 50, 44))
+        cv.vline(sx + 30 + i * 34, sy - 11, 11, (60, 50, 44))
+    for i, c in enumerate(cols[3:]):
+        cv.rect(sx + 10 + i * 34, sy - 22, 32, 11, c)
+        cv.vline(sx + 20 + i * 34, sy - 22, 11, (60, 50, 44))
+        cv.vline(sx + 30 + i * 34, sy - 22, 11, (60, 50, 44))
+    # dock crane silhouette behind the ship
+    cv.line(x + 168, y + 40, x + 168, y + 8, (52, 66, 84), 3)
+    cv.line(x + 168, y + 8, x + 138, y + 8, (52, 66, 84), 2)
+    cv.line(x + 146, y + 8, x + 146, y + 18, (52, 66, 84), 1)
+    cv.rect(x + 143, y + 18, 6, 5, (52, 66, 84))
+    cv.disc(x + w - 24, y + 13, 13, RED)
+    F["sans_b11"].draw_center(cv, x + w - 24, y + 17, "20%", WHITE)
 
 
 def scene_solomons(cv, x, y, w, h):
-    cv.vgrad(x, y, w, h, (240, 230, 200), (210, 190, 150))
-    cv.rect(x + 60, y + 10, 66, 44, WHITE)
-    cv.frame(x + 60, y + 10, 66, 44, INK)
-    cv.rect(x + 66, y + 16, 54, 3, RED)
+    cv.vgrad(x, y, w, h, (240, 230, 200), (214, 194, 154))
+    cv.disc(x + 168, y + 9, 6, (250, 214, 120))
+    # the treaty document: title bar, ruled lines, gold seal with ribbons
+    cv.rect(x + 56, y + 7, 68, 40, WHITE)
+    cv.frame(x + 56, y + 7, 68, 40, INK)
+    cv.rect(x + 62, y + 12, 56, 3, RED)
     for i in range(4):
-        cv.rect(x + 66, y + 24 + i * 6, 54 - i * 8, 2, GREY)
-    cv.poly([(x + 104, y + 44), (x + 118, y + 54), (x + 104, y + 54)], GOLD)
-    flag(cv, x + 14, y + 12, 26, 16, "AU")
-    cv.rect(x + 14, y + 34, 26, 16, (0, 110, 90))
-    cv.disc(x + 27, y + 42, 3, GOLD_L)
-    cv.disc(x + 20, y + 38, 1, WHITE)
-    cv.disc(x + 33, y + 46, 1, WHITE)
-    cv.line(x + 150, y + 58, x + 150, y + 30, (34, 110, 66), 2)
-    for a in (-30, 0, 30):
-        cv.line(x + 150, y + 32, x + 150 + int(14 * (a / 30.0)), y + 22 - abs(a) // 6,
-                (34, 110, 66), 2)
+        cv.rect(x + 62, y + 20 + i * 6, 56 - i * 9, 2, GREY)
+    cv.disc(x + 108, y + 38, 6, GOLD)
+    cv.disc(x + 108, y + 38, 3, GOLD_L)
+    cv.poly([(x + 104, y + 42), (x + 108, y + 50), (x + 110, y + 43)], RED)
+    cv.poly([(x + 112, y + 42), (x + 114, y + 50), (x + 109, y + 43)], BLUE)
+    # a pen resting on the document corner
+    cv.line(x + 118, y + 44, x + 132, y + 30, (30, 30, 40), 2)
+    cv.poly([(x + 130, y + 28), (x + 134, y + 30), (x + 131, y + 33)],
+            (30, 30, 40))
+    # the two flags: Australia and the Solomons
+    flag(cv, x + 12, y + 8, 28, 17, "AU")
+    cv.rect(x + 12, y + 29, 28, 17, (0, 110, 90))
+    cv.poly([(x + 12, y + 29), (x + 40, y + 29), (x + 12, y + 46)],
+            (40, 90, 170))
+    cv.line(x + 12, y + 44, x + 40, y + 31, GOLD_L, 2)
+    for fx, fy in ((17, 33), (24, 37), (31, 41)):
+        cv.disc(x + fx, y + fy, 1, WHITE)
+    cv.vline(x + 11, y + 7, 40, (90, 70, 50))
+    # palm tree on the right
+    cv.line(x + 158, y + 48, x + 155, y + 26, (110, 80, 50), 3)
+    for a, b in ((-14, -8), (-7, -11), (0, -12), (8, -11), (14, -7)):
+        cv.line(x + 155, y + 26, x + 155 + a, y + 26 + b, (34, 110, 66), 2)
+    cv.disc(x + 152, y + 29, 3, (120, 90, 40))
+    cv.disc(x + 158, y + 30, 3, (120, 90, 40))
 
 
 def scene_ukenergy(cv, x, y, w, h):
-    cv.vgrad(x, y, w, h, (250, 230, 190), (230, 200, 150))
-    cv.rect(x + 16, y + 26, 52, 30, (190, 120, 70))
-    cv.poly([(x + 10, y + 28), (x + 42, y + 8), (x + 74, y + 28)], (150, 60, 40))
-    cv.rect(x + 36, y + 40, 12, 16, (60, 40, 30))
-    for wxp in (22, 52):
-        cv.rect(x + wxp, y + 32, 10, 10, (255, 240, 170))
-    cv.poly([(x + 96, y + 12), (x + 84, y + 30), (x + 94, y + 30), (x + 84, y + 48),
-             (x + 100, y + 26), (x + 90, y + 26)], (250, 200, 0))
-    cv.rect(x + 120, y + 16, 52, 34, WHITE)
-    cv.frame(x + 120, y + 16, 52, 34, INK)
-    F["sans_b9"].draw(cv, x + 126, y + 28, "BILL", GREY)
-    F["sans_b10"].draw(cv, x + 126, y + 44, "2,166", RED)
+    cv.vgrad(x, y, w, h, (250, 230, 190), (232, 204, 156))
+    cv.rect(x, y + 44, w, 8, (150, 170, 90))
+    for gx in (8, 40, 150, 172):
+        cv.line(x + gx, y + 46, x + gx - 2, y + 41, (90, 130, 60), 1)
+        cv.line(x + gx + 3, y + 46, x + gx + 4, y + 41, (90, 130, 60), 1)
+    # house: brick walls, roof, smoking chimney, door, cross-framed windows
+    cv.rect(x + 14, y + 24, 54, 22, (190, 120, 70))
+    for ry in range(3):
+        cv.hline(x + 14, y + 30 + ry * 6, 54, (168, 104, 60))
+    cv.poly([(x + 8, y + 26), (x + 41, y + 8), (x + 74, y + 26)], (150, 60, 40))
+    cv.rect(x + 54, y + 10, 8, 12, (150, 90, 60))
+    cv.disc(x + 59, y + 6, 3, (200, 190, 175))
+    cv.disc(x + 63, y + 3, 2, (200, 190, 175))
+    cv.rect(x + 36, y + 34, 11, 12, (60, 40, 30))
+    cv.disc(x + 44, y + 40, 1, GOLD_L)
+    for wxp in (19, 52):
+        cv.rect(x + wxp, y + 29, 11, 10, (255, 240, 170))
+        cv.vline(x + wxp + 5, y + 29, 10, (120, 80, 50))
+        cv.hline(x + wxp, y + 34, 11, (120, 80, 50))
+    # low fence in front of the house
+    for fxp in range(5):
+        cv.rect(x + 12 + fxp * 15, y + 42, 3, 7, (120, 90, 60))
+    cv.rect(x + 12, y + 44, 62, 2, (120, 90, 60))
+    # lightning bolt between house and bill
+    cv.poly([(x + 94, y + 6), (x + 82, y + 24), (x + 91, y + 24), (x + 82, y + 44),
+             (x + 100, y + 20), (x + 90, y + 20)], (250, 200, 0))
+    # the bill itself, with ruled lines and the new cap figure
+    cv.rect(x + 118, y + 8, 56, 38, WHITE)
+    cv.frame(x + 118, y + 8, 56, 38, INK)
+    F["sans_b11"].draw(cv, x + 124, y + 20, "BILL", GREY)
+    cv.rect(x + 124, y + 24, 44, 2, GREY_L)
+    cv.rect(x + 124, y + 29, 34, 2, GREY_L)
+    F["sans_b12"].draw(cv, x + 124, y + 43, "£2,166", RED)
 
 
 def scene_gaza(cv, x, y, w, h):
-    cv.vgrad(x, y, w, h, (240, 210, 170), (200, 160, 110))
-    base = y + 56
-    for bx, bw, bh in ((8, 30, 26), (42, 22, 34), (68, 34, 20), (106, 26, 30)):
-        cv.rect(x + bx, base - bh, bw, bh, (120, 105, 85))
-        for wy in range(2):
-            cv.rect(x + bx + 5 + wy * 9, base - bh + 6, 4, 5, (60, 50, 40))
-    cv.rect(x + 150, base - 48, 10, 48, (100, 88, 72))
-    cv.disc(x + 155, base - 48, 5, (100, 88, 72))
-    cv.rect(x + 152, base - 32, 6, 5, (240, 190, 100))
-    cv.poly([(x + 40, base), (x + 60, base - 14), (x + 90, base - 8), (x + 110, base)],
-            (150, 130, 105))
-    _smoke(cv, x + 70, base - 20, 3, (210, 190, 165))
+    cv.vgrad(x, y, w, h, (226, 206, 178), (198, 176, 140))
+    cv.disc(x + 168, y + 10, 6, (246, 226, 170))
+    base = y + 46
+    # damaged blocks with window grids; the second has a bitten corner
+    for bx, bw, bh, cols in ((6, 30, 34, 2), (42, 34, 28, 2), (82, 26, 38, 2)):
+        cv.rect(x + bx, base - bh, bw, bh, (168, 158, 140))
+        _windows(cv, x + bx + 5, base - bh + 6, cols, 2, (70, 64, 56),
+                 cw=5, ch=6, gx=11, gy=11)
+    cv.poly([(x + 66, base - 28), (x + 76, base - 28), (x + 76, base - 18)],
+            (226, 206, 178))
+    # minaret with a cracked shaft
+    cv.rect(x + 148, base - 40, 9, 40, (168, 158, 140))
+    cv.disc(x + 152, base - 40, 6, (150, 140, 122))
+    cv.line(x + 150, base - 30, x + 154, base - 22, (90, 84, 74), 1)
+    cv.line(x + 154, base - 22, x + 151, base - 14, (90, 84, 74), 1)
+    # rubble pile with scattered debris blocks
+    cv.poly([(x + 96, base), (x + 116, base - 13), (x + 140, base)],
+            (140, 130, 112))
+    for rx, ry, rw in ((102, -4, 7), (118, -8, 6), (128, -3, 8), (110, -1, 5)):
+        cv.rect(x + rx, base + ry, rw, 4, (120, 112, 96))
+    cv.rect(x, base, w, h - 46, (176, 164, 138))
+    # drifting dust + smoke from the second block
+    for dxp, dyp in ((58, 30), (96, 36), (24, 38)):
+        cv.disc(x + dxp, y + dyp, 7, (216, 200, 168))
+        cv.disc(x + dxp + 8, y + dyp + 2, 5, (216, 200, 168))
+    _smoke(cv, x + 58, base - 22, 3, (120, 112, 100), r0=3)
+    _gulls(cv, x + 120, y + 8, (120, 110, 92))
 
 
 def scene_ukraine(cv, x, y, w, h):
     cv.vgrad(x, y, w, h, (40, 40, 60), (20, 20, 34))
-    for txp, th in ((16, 40), (48, 48), (86, 36), (120, 44)):
-        cv.rect(x + txp, y + 56 - th, 16, th, (120, 120, 130))
-        cv.rect(x + txp + 4, y + 52 - th, 8, 4, (90, 90, 100))
-        cv.line(x + txp + 8, y + 52 - th, x + txp + 8, y + 44 - th, (200, 200, 200), 1)
-    cv.rect(x + 140, y + 40, 30, 16, (150, 150, 160))
-    cv.disc(x + 155, y + 48, 7, (90, 90, 100))
-    _flame(cv, x + 56, y + 22, 24, 16, [(240, 90, 20), (250, 160, 40)])
-    _flame(cv, x + 128, y + 24, 18, 13, [(240, 90, 20), (250, 160, 40)])
-    _smoke(cv, x + 56, y + 6, 3, (70, 66, 60))
-    cv.rect(x, y + 56, w, 10, (30, 28, 26))
+    for sx, sy in ((30, 8), (90, 12), (150, 6), (60, 20), (170, 18)):
+        cv.disc(x + sx, y + sy, 1, (200, 200, 210))
+    base = y + 44
+    # refinery towers joined by pipe runs, with ladders and warning lights
+    for txp, th in ((14, 30), (44, 32), (78, 27), (110, 34)):
+        cv.rect(x + txp, base - th, 15, th, (120, 120, 130))
+        cv.rect(x + txp + 3, base - th - 4, 9, 4, (90, 90, 100))
+        cv.line(x + txp + 12, base - th + 4, x + txp + 12, base - 4,
+                (200, 200, 200), 1)
+        for ry in range(3):
+            cv.hline(x + txp + 10, base - th + 8 + ry * 8, 4, (200, 200, 200))
+        cv.disc(x + txp + 7, base - th - 6, 1, (240, 60, 40))
+    cv.hline(x + 20, base - 24, 100, (160, 160, 170))
+    cv.hline(x + 20, base - 14, 100, (160, 160, 170))
+    # dome storage tanks on the right
+    for dxp in (140, 162):
+        cv.rect(x + dxp, base - 12, 20, 12, (150, 150, 160))
+        cv.disc(x + dxp + 10, base - 12, 8, (150, 150, 160))
+        cv.rect(x + dxp, base - 13, 20, 2, (120, 120, 130))
+    _flame(cv, x + 51, base - 32, 22, 11, [(240, 90, 20), (250, 160, 40)])
+    _flame(cv, x + 150, base - 20, 16, 12, [(240, 90, 20), (250, 160, 40)])
+    # ground + perimeter fence
+    cv.rect(x, base, w, h - 44, (30, 28, 26))
+    for fxp in range(6):
+        cv.rect(x + 8 + fxp * 30, base + 2, 2, 6, (90, 88, 80))
+    cv.rect(x + 6, base + 3, w - 12, 1, (90, 88, 80))
+    cv.rect(x + 6, base + 6, w - 12, 1, (90, 88, 80))
 
 
 def scene_bangladesh(cv, x, y, w, h):
     cv.vgrad(x, y, w, h, (250, 235, 200), (225, 200, 150))
-    cv.rect(x + 12, y + 18, 70, 38, (180, 90, 60))
-    cv.rect(x + 82, y + 6, 10, 50, (150, 70, 50))
-    cv.rect(x + 78, y + 2, 18, 6, (150, 70, 50))
-    for wxp in (20, 40, 60):
-        cv.rect(x + wxp, y + 26, 12, 10, (255, 240, 170))
-    cv.rect(x + 20, y + 42, 54, 4, (120, 60, 40))
-    cv.line(x + 100, y + 14, x + 172, y + 14, (90, 70, 50), 1)
-    for i, c in enumerate(((220, 60, 50), (40, 120, 180), (240, 180, 40), (40, 150, 90))):
-        cv.rect(x + 106 + i * 17, y + 14, 14, 16, c)
-    cv.rect(x + 118, y + 40, 52, 16, (0, 130, 70))
-    F["sans_b9"].draw(cv, x + 124, y + 51, "17,000", WHITE)
+    cv.disc(x + 168, y + 9, 6, (250, 214, 120))
+    # garment factory: lit window grid, chimney, door, sign band
+    cv.rect(x + 10, y + 16, 76, 30, (180, 90, 60))
+    cv.rect(x + 80, y + 4, 10, 42, (150, 70, 50))
+    cv.rect(x + 76, y + 1, 18, 6, (150, 70, 50))
+    _windows(cv, x + 17, y + 22, 3, 2, (255, 240, 170), cw=9, ch=7, gx=15, gy=12)
+    cv.rect(x + 66, y + 34, 10, 12, (90, 50, 36))
+    cv.rect(x + 14, y + 40, 62, 4, (120, 60, 40))
+    for dpx in (20, 34, 48, 62):
+        cv.disc(x + dpx, y + 42, 1, GOLD_L)
+    # clothes line with five garments on pegs
+    cv.line(x + 100, y + 12, x + 176, y + 12, (90, 70, 50), 1)
+    for i, (c, gh) in enumerate((((220, 60, 50), 15), ((40, 120, 180), 11),
+                                 ((240, 180, 40), 14), ((40, 150, 90), 10),
+                                 ((200, 90, 140), 13))):
+        gx = x + 104 + i * 15
+        cv.rect(gx, y + 12, 12, gh, c)
+        cv.disc(gx + 2, y + 12, 1, (60, 50, 40))
+        cv.disc(gx + 10, y + 12, 1, (60, 50, 40))
+    # the new wage on a green board + three workers below
+    cv.rect(x + 102, y + 34, 58, 15, (0, 130, 70))
+    cv.frame(x + 102, y + 34, 58, 15, (0, 100, 52))
+    F["sans_b11"].draw_center(cv, x + 131, y + 45, "17,000", WHITE)
+    for pxp in (18, 34, 50):
+        _person(cv, x + pxp, y + 38, (60, 44, 36))
 
 
 def scene_sudan(cv, x, y, w, h):
     cv.vgrad(x, y, w, h, (250, 210, 150), (210, 160, 100))
-    base = y + 56
-    for bx, bw, bh in ((10, 34, 20), (50, 28, 26), (84, 36, 18)):
+    cv.disc(x + 18, y + 9, 7, (252, 230, 170))
+    base = y + 44
+    # three mud houses with doors and windows
+    for bx, bw, bh in ((8, 32, 19), (46, 27, 24), (79, 34, 17)):
         cv.rect(x + bx, base - bh, bw, bh, (170, 140, 100))
-        cv.poly([(x + bx - 2, base - bh), (x + bx + bw // 2, base - bh - 10),
+        cv.poly([(x + bx - 2, base - bh), (x + bx + bw // 2, base - bh - 9),
                  (x + bx + bw + 2, base - bh)], (140, 90, 60))
-    _flame(cv, x + 64, base - 26, 18, 16, [(240, 90, 20), (250, 160, 40)])
-    _smoke(cv, x + 64, base - 42, 3, (90, 84, 76))
-    cv.rect(x + 140, y + 12, 22, 6, (60, 60, 60))
-    cv.rect(x + 146, y + 18, 10, 4, (60, 60, 60))
-    cv.disc(x + 144, y + 15, 2, (30, 30, 30))
-    cv.disc(x + 158, y + 15, 2, (30, 30, 30))
-    cv.line(x + 140, y + 20, x + 132, y + 34, (120, 110, 100), 1)
-    cv.line(x + 162, y + 20, x + 170, y + 34, (120, 110, 100), 1)
+        cv.rect(x + bx + bw // 2 - 3, base - 10, 7, 10, (90, 64, 40))
+        cv.rect(x + bx + 4, base - bh + 5, 5, 5, (90, 70, 46))
+    _flame(cv, x + 59, base - 24, 17, 15, [(240, 90, 20), (250, 160, 40)])
+    _smoke(cv, x + 59, base - 22, 2, (90, 84, 76), r0=3)
+    # flat-top acacia tree
+    cv.line(x + 130, base, x + 128, base - 22, (110, 80, 50), 3)
+    cv.line(x + 129, base - 14, x + 120, base - 20, (110, 80, 50), 2)
+    for dxp in (108, 122, 136, 148):
+        cv.disc(x + dxp, base - 24, 8, (96, 130, 70))
+    # two people running from the strike zone
+    _person(cv, x + 120, base - 11, (70, 52, 40))
+    _person(cv, x + 132, base - 11, (70, 52, 40))
+    # the drone overhead: body, four rotors, camera, dashed drop lines
+    cv.rect(x + 34, y + 5, 20, 5, (60, 60, 60))
+    cv.rect(x + 39, y + 10, 10, 3, (60, 60, 60))
+    cv.disc(x + 44, y + 14, 2, (200, 40, 40))
+    for rx in (30, 54):
+        cv.disc(x + rx, y + 4, 2, (90, 90, 90))
+        cv.disc(x + rx, y + 11, 2, (90, 90, 90))
+    for dyp in range(2):
+        cv.disc(x + 38, y + 19 + dyp * 5, 1, (120, 110, 100))
+        cv.disc(x + 50, y + 19 + dyp * 5, 1, (120, 110, 100))
+    # dust at ground level
+    for dxp in (30, 90, 150):
+        cv.disc(x + dxp, base + 3, 5, (222, 190, 140))
 
 
 def scene_java(cv, x, y, w, h):
     cv.vgrad(x, y, w, h, (200, 220, 200), (120, 160, 110))
-    cv.poly([(x, y + 66), (x + 40, y + 20), (x + 80, y + 66)], (60, 110, 70))
-    cv.poly([(x + 90, y + 66), (x + 130, y + 26), (x + 170, y + 66)], (50, 100, 60))
-    cv.rect(x + 70, y + 30, 44, 36, (40, 34, 28))
-    cv.rect(x + 78, y + 38, 28, 28, (24, 60, 90))
-    cv.vgrad(x + 78, y + 52, 28, 14, (60, 140, 190), (30, 90, 140))
-    cv.rect(x + 66, y + 26, 52, 5, (90, 70, 50))
-    cv.disc(x + 92, y + 24, 5, (240, 200, 40))
-    cv.rect(x + 30, y + 50, 16, 10, (220, 160, 40))
-    cv.rect(x + 34, y + 46, 8, 5, (220, 160, 40))
-    for i in range(3):
-        cv.rect(x + 130 + i * 14, y + 52 + (i % 2) * 4, 10, 6, (90, 70, 50))
+    cv.disc(x + 168, y + 9, 6, (250, 230, 160))
+    # terraced hills: two slopes with contour lines
+    cv.poly([(x, y + 52), (x + 38, y + 16), (x + 78, y + 52)], (60, 110, 70))
+    cv.poly([(x + 92, y + 52), (x + 128, y + 22), (x + 172, y + 52)], (50, 100, 60))
+    for t in range(3):
+        yy = y + 28 + t * 8
+        cv.line(x + 12 + t * 4, yy, x + 62 - t * 4, yy, (44, 92, 56), 1)
+        cv.line(x + 104 + t * 4, y + 32 + t * 7, x + 158 - t * 4, y + 32 + t * 7,
+                (40, 86, 52), 1)
+    # flooded mine mouth: timber frame, dark opening, water, lamp
+    cv.rect(x + 64, y + 20, 48, 32, (40, 34, 28))
+    cv.rect(x + 70, y + 26, 36, 26, (24, 60, 90))
+    cv.vgrad(x + 70, y + 38, 36, 14, (60, 140, 190), (30, 90, 140))
+    cv.rect(x + 60, y + 16, 56, 5, (90, 70, 50))
+    cv.rect(x + 62, y + 21, 4, 31, (90, 70, 50))
+    cv.rect(x + 110, y + 21, 4, 31, (90, 70, 50))
+    cv.disc(x + 88, y + 13, 5, (240, 200, 40))
+    cv.disc(x + 88, y + 13, 2, (255, 240, 170))
+    # stream running out of the mine
+    cv.line(x + 88, y + 52, x + 80, y + 51, (90, 170, 210), 2)
+    cv.line(x + 80, y + 51, x + 66, y + 52, (90, 170, 210), 2)
+    # rescue truck with beacon
+    cv.rect(x + 10, y + 38, 26, 10, (230, 120, 30))
+    cv.rect(x + 30, y + 41, 8, 7, (200, 100, 24))
+    cv.rect(x + 31, y + 42, 5, 4, (190, 220, 240))
+    cv.disc(x + 20, y + 36, 2, (240, 60, 40))
+    cv.disc(x + 16, y + 49, 3, (20, 20, 20))
+    cv.disc(x + 30, y + 49, 3, (20, 20, 20))
+    # three helmeted rescuers + a rope line to the frame
+    for pxp in (124, 138, 152):
+        _person(cv, x + pxp, y + 38, (40, 60, 90))
+        cv.disc(x + pxp, y + 37, 3, (250, 200, 40))
+    cv.line(x + 112, y + 18, x + 146, y + 10, (90, 70, 50), 1)
+    cv.disc(x + 146, y + 10, 2, (60, 50, 40))
+    # trees and rocks in the foreground
+    for txp in (44, 164):
+        cv.rect(x + txp, y + 40, 3, 10, (90, 66, 44))
+        cv.disc(x + txp + 1, y + 36, 6, (44, 100, 58))
+        cv.disc(x + txp - 3, y + 40, 4, (44, 100, 58))
+    for rx, ry in ((56, 47), (118, 48), (24, 48)):
+        cv.rect(x + rx, y + ry, 9, 5, (110, 100, 88))
 
 # ---------------------------------------------------------------- data
 REGIONS = [
@@ -868,12 +1133,12 @@ TIMELINE = [
 ]
 
 NUMBERS = [
-    ("-6.2%", "Kospi close, worst in AI sell-off"),
+    ("-6.2%", "Kospi close in AI sell-off"),
     ("30+", "killed in Cairo tanker fire"),
     ("50,183", "Dow close, up 0.3%"),
     ("20%", "top US tariff rate, on China"),
-    ("+26%", "UK energy price cap, January"),
-    ("490,334", "Russian war dead, leaked data"),
+    ("+26%", "UK energy cap, January"),
+    ("490,334", "Russian war dead, leaked"),
 ]
 
 HEROES = [
@@ -902,7 +1167,7 @@ MIDS = [
          headline="Coalition strikes Hodeidah port",
          deck="Strikes follow evacuation order; 4 drones downed over Ras Tanura.",
          status="CONFIRMED", stat="4 DRONES", scene=scene_hodeidah),
-    dict(n=5, place="SEOUL · TOKYO · TAIPEI", field="ASIA · MARKETS",
+    dict(n=5, place="SEOUL · TOKYO", field="ASIA · MARKETS",
          headline="AI doubts sink Asian chip stocks",
          deck="Kospi -6.2%, Nikkei -2.8%; Dow edges up to 50,183.",
          status="REPORTED", stat="-6.2%", scene=scene_markets),
@@ -989,101 +1254,117 @@ SUBHEAD = ("Two tankers burn in the Strait of Hormuz · Pakistan's first "
            "astronaut docks at Tiangong · 30 die in a Cairo tanker fire")
 
 
+def wrap_brief(place, text, w):
+    """Wrap one brief: line 1 starts with the bold 'PLACE: ' prefix, so its
+    regular part gets w minus the bold prefix width; later lines are plain
+    regular at full width. Returns the list of regular-text lines (line 1
+    excludes the prefix)."""
+    fb, fr = F["sans_b11"], F["sans_r11"]
+    words = text.split()
+    lines = []
+    cap = w - fb.width(place + ": ")
+    cur = ""
+    i = 0
+    while i < len(words):
+        trial = words[i] if not cur else cur + " " + words[i]
+        if fr.width(trial) <= cap or not cur:
+            cur = trial
+            i += 1
+        else:
+            lines.append(cur)
+            cur = ""
+            cap = w
+    if cur:
+        lines.append(cur)
+    return lines
+
+
 # ---------------------------------------------------------------- layout
 def draw_page(cv):
     # top bar
     cv.rect(0, 0, W, 20, NAVY)
-    F["sans_b10"].draw(cv, 28, 14, "THE WORLD IN ONE DAY", GOLD_L)
+    F["sans_b11"].draw(cv, 28, 14, "THE WORLD IN ONE DAY", GOLD_L)
     right = "37 STORIES · 7 REGIONS · ALL FROM WEDNESDAY 25 NOVEMBER 2026"
-    F["sans_b9"].draw(cv, 996 - F["sans_b9"].width(right), 14, right, WHITE)
+    F["sans_r11"].draw(cv, 996 - F["sans_r11"].width(right), 14, right, WHITE)
     cv.rect(0, 20, W, 2, GOLD)
 
     # masthead
     title = "Wednesday 25 November 2026"
     tw = F["serif_b56"].width(title)
     assert tw <= 968, f"masthead too wide: {tw}"
-    F["serif_b56"].draw(cv, 28, 24 + F["serif_b56"].ascent, title, INK)
-    F["serif_i13"].draw(cv, 28, 96, SUBHEAD, RED)
-    cv.hline(28, 104, 968, LINE)
+    F["serif_b56"].draw(cv, 28, 22 + F["serif_b56"].ascent, title, INK)
+    F["serif_i14"].draw(cv, 28, 90, SUBHEAD, RED)
+    cv.hline(28, 98, 968, LINE)
 
     # region chips
     cx = 28
     for name, count, color in REGIONS:
         label = f"{name} {count}"
-        w = F["sans_b9"].width(label) + 12
-        cv.rrect(cx, 110, w, 16, 3, color)
-        F["sans_b9"].draw(cv, cx + 6, 121, label, WHITE)
+        w = F["sans_b11"].width(label) + 12
+        cv.rrect(cx, 104, w, 19, 3, color)
+        F["sans_b11"].draw(cv, cx + 6, 117, label, WHITE)
         cx += w + 6
+    assert cx - 6 <= 996, "region chips overflow"
 
     # UTC strip (drop the last beat if it would overflow)
     beats = list(TIMELINE)
     while True:
-        parts = []
+        total = F["sans_b11"].width("THE DAY IN UTC") + 14
         for t, s in beats:
-            parts.append((t, s))
-        total = F["sans_b10"].width("THE DAY IN UTC") + 14
-        for t, s in beats:
-            total += F["sans_b10"].width(t) + 5 + F["sans_r10"].width(s) + 12
+            total += F["sans_b11"].width(t) + 5 + F["sans_r11"].width(s) + 12
         if total <= 968 or len(beats) <= 5:
             break
         beats.pop()
-    cv.rect(28, 134, 968, 22, NAVY)
+    cv.rect(28, 130, 968, 25, NAVY)
     cx = 38
-    cx = F["sans_b10"].draw(cv, cx, 149, "THE DAY IN UTC", GOLD_L) + 12
+    cx = F["sans_b11"].draw(cv, cx, 146, "THE DAY IN UTC", GOLD_L) + 12
     for t, s in beats:
-        cx = F["sans_b10"].draw(cv, cx, 149, t, GOLD_L) + 5
-        cx = F["sans_r10"].draw(cv, cx, 149, s, WHITE) + 12
+        cx = F["sans_b11"].draw(cv, cx, 146, t, GOLD_L) + 5
+        cx = F["sans_r11"].draw(cv, cx, 146, s, WHITE) + 12
 
     # ---- heroes + numbers panel
-    hy = 164
+    hy = 162
     hw = 258
     for i, hro in enumerate(HEROES):
         x = 28 + i * (hw + 8)
-        cv.rect(x, hy, hw, 20, RED)
-        cv.disc(x + 12, hy + 10, 8, WHITE)
-        F["sans_b9"].draw_center(cv, x + 12, hy + 13, str(hro["n"]), RED)
-        F["sans_b11"].draw(cv, x + 26, hy + 14, hro["place"], WHITE)
-        cv.rect(x, hy + 20, hw, 2, GOLD)
-        hro["scene"](cv, x, hy + 22, hw, 100)
-        cv.frame(x, hy + 22, hw, 100, (120, 110, 90))
+        cv.rect(x, hy, hw, 22, RED)
+        num_circle(cv, x + 13, hy + 11, hro["n"], 9)
+        F["sans_b12"].draw(cv, x + 28, hy + 15, hro["place"], WHITE)
+        cv.rect(x, hy + 22, hw, 2, GOLD)
+        hro["scene"](cv, x, hy + 24, hw, 76)
+        cv.frame(x, hy + 24, hw, 76, (120, 110, 90))
         # stat chip inside scene, top right
-        chip(cv, x + hw - F["sans_b9"].width(hro["stat"]) - 14, hy + 26,
+        chip(cv, x + hw - F["sans_b11"].width(hro["stat"]) - 18, hy + 28,
              hro["stat"], (20, 20, 20))
-        ky = hy + 128
-        F["sans_b9"].draw(cv, x, ky, hro["field"], RED)
-        bw = badge(cv, x + hw - F["sans_b9"].width(hro["status"]) - 10, ky - 3,
-                   hro["status"])
+        F["sans_b11"].draw(cv, x, hy + 114, hro["field"], RED)
+        badge(cv, x + hw - F["sans_b11"].width(hro["status"]) - 12, hy + 102,
+              hro["status"])
         hl = wrap(hro["headline"], F["serif_b20"], hw)
         assert len(hl) <= 2, f"hero headline too long: {hro['headline']}"
-        draw_lines(cv, F["serif_b20"], x, ky + 14, hl, INK, 22)
-        dl = wrap(hro["deck"], F["serif_r12"], hw)
-        assert len(dl) <= 2, f"hero deck too long: {hro['deck']}"
-        draw_lines(cv, F["serif_r12"], x, ky + 60, dl, INK, 14)
-        # label sits below the LAST deck line, computed from real metrics:
-        # deck last baseline + deck descent + label ascent + 4px clear gap
-        last_base = ky + 60 + (len(dl) - 1) * 14 + F["serif_r12"].ascent
-        wy = (last_base + F["serif_r12"].descent
-              + F["sans_b9"].ascent + 4)
-        F["sans_b9"].draw(cv, x, wy, "WHY IT MATTERS", RED)
-        wl = wrap(hro["why"], F["serif_i11"], hw)
+        draw_lines(cv, F["serif_b20"], x, hy + 120, hl, INK, 23)
+        dl = wrap(hro["deck"], F["serif_r13"], hw)
+        assert len(dl) <= 3, f"hero deck too long: {hro['deck']}"
+        draw_lines(cv, F["serif_r13"], x, hy + 172, dl, INK, 16)
+        F["sans_b11"].draw(cv, x, hy + 232, "WHY IT MATTERS", RED)
+        wl = wrap(hro["why"], F["serif_i12"], hw)
         assert len(wl) <= 1, f"hero why too long: {hro['why']}"
-        draw_lines(cv, F["serif_i11"], x, wy + 12, wl, INK, 13)
-        F["sans_r8"].draw(cv, x, hy + 272, hro["source"], GREY)
+        draw_lines(cv, F["serif_i12"], x, hy + 236, wl, INK, 15)
+        F["sans_r11"].draw(cv, x, hy + 262, hro["source"], GREY)
 
     # numbers panel (hero row only)
-    px, py, pw, ph = 830, 164, 166, 276
+    px, py, pw, ph = 826, 162, 170, 264
     cv.rect(px, py, pw, ph, NAVY)
     cv.rect(px, py, pw, 3, GOLD)
-    F["sans_b10"].draw(cv, px + 12, py + 18, "THE DAY IN NUMBERS", GOLD_L)
-    cv.hline(px + 12, py + 26, pw - 24, (80, 90, 120))
+    F["sans_b12"].draw(cv, px + 12, py + 16, "THE DAY IN NUMBERS", GOLD_L)
+    cv.hline(px + 12, py + 24, pw - 24, (80, 90, 120))
     for i, (num, cap) in enumerate(NUMBERS):
-        iy = py + 34 + i * 40
+        iy = py + 32 + i * 38
         F["serif_b22"].draw(cv, px + 12, iy + 20, num, GOLD_L)
-        cl = wrap(cap, F["sans_r8"], pw - 24)
+        cl = wrap(cap, F["sans_r11"], pw - 24)
         assert len(cl) <= 1, f"number caption too long: {cap}"
-        F["sans_r8"].draw(cv, px + 12, iy + 34, cl[0], WHITE)
+        F["sans_r11"].draw(cv, px + 12, iy + 33, cl[0], WHITE)
         if i:
-            cv.hline(px + 12, iy - 5, pw - 24, (80, 90, 120))
+            cv.hline(px + 12, iy - 6, pw - 24, (80, 90, 120))
 
     # ---- mids: two uniform rows of five
     mw = 185
@@ -1091,68 +1372,75 @@ def draw_page(cv):
         for col in range(5):
             m = MIDS[row * 5 + col]
             x = 28 + col * 194
-            y = 446 + row * 156
-            m["scene"](cv, x, y, mw, 66)
-            cv.frame(x, y, mw, 66, (120, 110, 90))
-            chip(cv, x + mw - F["sans_b9"].width(m["stat"]) - 12, y + 4,
+            y = 436 + row * 154
+            m["scene"](cv, x, y, mw, 52)
+            cv.frame(x, y, mw, 52, (120, 110, 90))
+            chip(cv, x + mw - F["sans_b11"].width(m["stat"]) - 16, y + 4,
                  m["stat"], (20, 20, 20))
-            num_circle(cv, x + 11, y + 11, m["n"], 7)
-            py2 = y + 68
-            F["sans_b9"].draw(cv, x, py2, m["place"], RED)
-            badge(cv, x + mw - F["sans_b9"].width(m["status"]) - 10, py2 - 3,
+            num_circle(cv, x + 12, y + 12, m["n"], 9)
+            F["sans_b11"].draw(cv, x, y + 65, m["place"], RED)
+            badge(cv, x + mw - F["sans_b11"].width(m["status"]) - 12, y + 53,
                   m["status"])
-            F["sans_b9"].draw(cv, x, py2 + 11, m["field"], GREY)
-            hl = wrap(m["headline"], F["serif_b15"], mw)
+            F["sans_b11"].draw(cv, x, y + 76, m["field"], GREY)
+            hl = wrap(m["headline"], F["serif_b18"], mw)
             assert len(hl) <= 2, f"mid headline too long: {m['headline']}"
-            draw_lines(cv, F["serif_b15"], x, py2 + 24, hl, INK, 16)
-            dl = wrap(m["deck"], F["serif_r11"], mw)
+            draw_lines(cv, F["serif_b18"], x, y + 81, hl, INK, 20)
+            dl = wrap(m["deck"], F["serif_r13"], mw)
             assert len(dl) <= 2, f"mid deck too long: {m['deck']}"
-            draw_lines(cv, F["serif_r11"], x, py2 + 55, dl, INK, 12)
+            draw_lines(cv, F["serif_r13"], x, y + 124, dl, INK, 15)
 
     # ---- bottom: map + briefs
-    by = 762
-    F["sans_b11"].draw(cv, 28, by + 11, "ALSO ON WEDNESDAY 25 NOVEMBER", RED)
-    F["sans_b11"].draw(cv, 428, by + 11, "WHERE IT HAPPENED", NAVY)
+    F["sans_b12"].draw(cv, 28, 758, "WHERE IT HAPPENED", NAVY)
+    F["sans_b12"].draw(cv, 344, 758, "ALSO ON WEDNESDAY 25 NOVEMBER", RED)
     cap = "numbered pins = stories 1-13 · dots = briefs 14-37"
-    F["sans_r9"].draw(cv, 996 - F["sans_r9"].width(cap), by + 11, cap, GREY)
-    cv.hline(28, by + 16, 968, LINE)
-    draw_map(cv, 28, 778, 380, 172, PINS)
-    draw_brief_dots(cv, 28, 778, 380, 172,
+    F["sans_r11"].draw(cv, 996 - F["sans_r11"].width(cap), 758, cap, GREY)
+    cv.hline(28, 764, 968, LINE)
+    draw_map(cv, 28, 770, 300, 180, PINS)
+    draw_brief_dots(cv, 28, 770, 300, 180,
                     [(n, lon, lat) for n, _, _, _, lon, lat in BRIEFS])
 
-    col_w = 278
-    for k, (n, place, flg, text, lon, lat) in enumerate(BRIEFS):
-        col = 0 if k < 12 else 1
-        j = k if k < 12 else k - 12
-        bx = 428 + col * 288
-        byy = 778 + j * 15
-        cv.rrect(bx, byy, 16, 11, 2, RED)
-        F["sans_b9"].draw_center(cv, bx + 8, byy + 9, str(n), WHITE)
-        flag(cv, bx + 20, byy + 1, 14, 10, flg)
-        tx = bx + 38
-        full = place + ": " + text
-        lines = wrap(full, F["sans_r9"], col_w - 38)
-        assert len(lines) <= 1, f"brief too long for one line: {full}"
-        # bold the place on the first line
-        F["sans_b9"].draw(cv, tx, byy + 9, place + ":", RED)
-        rest_w = F["sans_b9"].width(place + ": ")
-        first = lines[0][len(place) + 2:]
-        F["sans_r9"].draw(cv, tx + rest_w, byy + 9, first, INK)
-        if len(lines) > 1:
-            F["sans_r9"].draw(cv, tx, byy + 20, lines[1], INK)
+    # briefs: two columns, split so both columns end at about the same height
+    text_w = 282
+    wrapped = []
+    for (n, place, flg, text, lon, lat) in BRIEFS:
+        lines = wrap_brief(place, text, text_w)
+        assert len(lines) <= 2, f"brief wraps past 2 lines: {place}"
+        wrapped.append((n, place, flg, lines, 14 + 13 * (len(lines) - 1)))
+    total_h = sum(it[4] for it in wrapped)
+    best_k, best_max = len(wrapped), total_h
+    acc = 0
+    for k in range(1, len(wrapped)):
+        acc += wrapped[k - 1][4]
+        if max(acc, total_h - acc) < best_max:
+            best_k, best_max = k, max(acc, total_h - acc)
+    assert best_max <= 182, f"brief columns too tall: {best_max}"
+    for col, group in enumerate((wrapped[:best_k], wrapped[best_k:])):
+        bx = 344 + col * 326
+        top = 770
+        for (n, place, flg, lines, ih) in group:
+            cv.rrect(bx, top, 20, 15, 2, RED)
+            F["sans_b11"].draw_center(cv, bx + 10, top + 12, str(n), WHITE)
+            flag(cv, bx + 24, top + 2, 16, 11, flg)
+            tx = bx + 44
+            F["sans_b11"].draw(cv, tx, top + 11, place + ":", RED)
+            pw_ = F["sans_b11"].width(place + ": ")
+            F["sans_r11"].draw(cv, tx + pw_, top + 11, lines[0], INK)
+            if len(lines) > 1:
+                F["sans_r11"].draw(cv, tx, top + 24, lines[1], INK)
+            top += ih
 
     # ---- date check + footer
-    dy = 960
+    dy = 957
     cv.frame(28, dy, 968, 40, RED, 2)
-    cv.rect(28, dy, 96, 40, RED)
-    F["sans_b11"].draw_center(cv, 76, dy + 17, "DATE CHECK", WHITE)
-    F["sans_b11"].draw_center(cv, 76, dy + 31, "25 NOV 2026", WHITE)
-    dl = wrap(DATE_CHECK, F["serif_r11"], 968 - 116)
+    cv.rect(28, dy, 104, 40, RED)
+    F["sans_b12"].draw_center(cv, 80, dy + 17, "DATE CHECK", WHITE)
+    F["sans_b11"].draw_center(cv, 80, dy + 31, "25 NOV 2026", WHITE)
+    dl = wrap(DATE_CHECK, F["serif_r12"], 848)
     assert len(dl) <= 2, "date check too long"
-    draw_lines(cv, F["serif_r11"], 136, dy + 15, dl, INK, 14)
-    fl = wrap(FOOTER, F["sans_r8"], 968)
+    draw_lines(cv, F["serif_r12"], 140, dy + 7, dl, INK, 15)
+    fl = wrap(FOOTER, F["sans_r11"], 968)
     assert len(fl) <= 2, "footer too long"
-    draw_lines(cv, F["sans_r8"], 28, dy + 52, fl, GREY, 10)
+    draw_lines(cv, F["sans_r11"], 28, dy + 42, fl, GREY, 11)
 
 
 def main():

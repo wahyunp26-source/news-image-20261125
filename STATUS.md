@@ -240,3 +240,44 @@ tariff, +26% UK cap, 490,334 Russian dead.
   masthead, hero headlines, decks, briefs and footer all smooth.
 - `assets_blob.py` grew 41,612 -> 146,598 bytes (grayscale atlases).
 - NOT submitted, NOT pushed to GitHub. Local git commit only.
+
+## v5 — illustration richness + type-size pass (26 Nov)
+
+- Wahyu rejected v4's preview on two counts: "ilustrasi kasar" (scenes
+  too sparse/crude) and "masih banyak font yang kekecilan" (too much
+  small text).
+- Type: the font set was rebuilt with NO size below 11px on the
+  1024x1024 canvas (briefs, chips, badges, decks, footer, captions,
+  scene labels included). New SPECS in `gen_assets.py`: serif_b56,
+  serif_b22, serif_b20, serif_b18, serif_b17 (unused), serif_b16
+  (unused), serif_r13, serif_r12, serif_i14, serif_i12, sans_b12,
+  sans_b11, sans_r11. The v4 anti-aliased Liberation Serif/Sans system
+  (8-bit grayscale atlases, alpha blend) is unchanged, just larger.
+  Layout was reflowed to fit: heroes 258x76 scenes with 3-line decks,
+  mids 185x52 scenes with serif_b18 headlines and serif_r13 decks,
+  briefs re-wrapped with a mixed bold-place/regular-text wrapper and a
+  height-balanced two-column split. Three numbers captions and one mid
+  place tag were shortened (facts unchanged); the story set is intact:
+  3 heroes + 10 mids + 24 briefs = 37 stories.
+- Illustrations: every scene was redrawn denser (8-15 elements each) —
+  Hormuz gained a distant third ship, tank domes, oil slick, wakes and
+  chained mines; Tiangong gained gridded solar arrays, an antenna and a
+  horizontal Shenzhou capsule with thruster and docking marker; Cairo
+  gained a minaret, dome, streetlight, cars and teardrop flames;
+  Hodeidah ribbed multicolour container stacks and a dock crane;
+  Markets candlesticks and a counter-trend line; Tariffs a second
+  container row, bridge windows, flag and crane; Solomons a sealed
+  treaty with ribbons, pen and two flags; UK energy a fenced house and
+  a ruled bill; Gaza window grids, a cracked minaret, rubble and dust;
+  Ukraine pipe runs, ladders, dome tanks and a perimeter fence;
+  Bangladesh a window grid, five pegged garments and worker figures;
+  Sudan an acacia, running figures and a relocated visible drone;
+  Java terraced hills, a stream, helmeted rescuers and a rope line.
+  The v3 fine dotted world map, colours and story facts are unchanged.
+- New entry.png: 1024x1024, 304,230 bytes, SHA-256
+  `5133d63bf09e00933f85846d1c4ce3b813f9e17b1cf8429273291e8288e38c3c`.
+  Two grader-style runs (repo read-only, `python3 -P -s`, output only
+  to a temp dir) produced byte-identical output. Visually verified at
+  full res + zoomed crops of every hero and the fixed mid scenes:
+  scenes read detailed, smallest text (11px) reads comfortably.
+- NOT submitted, NOT pushed to GitHub. Local git commit only.
